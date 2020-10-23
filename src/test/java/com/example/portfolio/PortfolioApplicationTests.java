@@ -2,23 +2,29 @@ package com.example.portfolio;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = PortfolioApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class PortfolioApplicationTests {
@@ -52,34 +58,38 @@ class PortfolioApplicationTests {
 
 	@Test()
 	@SuppressWarnings("unchecked")
-	void shouldReturn404WhenNoMatchCriteria() {
+	void shouldThrowExceptionWhenNoCriteriaMatch() {
 		PortfolioCriteria portfolioCriteria = new PortfolioCriteria();
 		portfolioCriteria.setShortPosition(10);
 		portfolioCriteria.setSide("short");
 		ResponseEntity<List> response = null;
-		try {
-			response = restTemplate
-					.postForEntity(url.concat("/select"), portfolioCriteria, List.class);
-		} catch (Exception e){
-
-		} finally {
-//			assertAll(
-//					() -> assertNotNull(response.getBody()),
-//					() -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode())
-		}
+		assertThrows(HttpClientErrorException.class, () -> restTemplate
+				.postForEntity(url.concat("/select"), portfolioCriteria, List.class));
 	}
+
 
 	@Test
 	void shouldReturn10ElementsSortedBySecurityId() {
 		PortfolioCriteria portfolioCriteria = new PortfolioCriteria();
 		portfolioCriteria.setOrderBy("securityId");
-		ResponseEntity<List> response = restTemplate
-				.postForEntity(url.concat("/select"), portfolioCriteria, List.class);
 
-//		boolean sorted = IntStream.range(0, portfolios.size() - 1).allMatch(x ->
-//				portfolios.get(x).getSecurityId().compareTo(portfolios.get(x + 1).getSecurityId()) > 1);
+		final HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		final HttpEntity<PortfolioCriteria> postRequest = new HttpEntity<>(portfolioCriteria, headers);
+		final List<Portfolio> parameterizedList = getParameterizedList(url
+				.concat("/select"), postRequest, new ParameterizedTypeReference<List<Portfolio>>() { });
+
+		boolean sorted = IntStream.range(0, parameterizedList.size() - 1).allMatch(x ->
+				parameterizedList.get(x).getSecurityId().compareTo(parameterizedList.get(x + 1).getSecurityId()) <= 0);
+
 		assertAll(
-				() -> assertNotNull(response.getBody()),
-				() -> assertEquals(10, response.getBody().size()));
+				() -> assertNotNull(parameterizedList),
+				() -> assertEquals(10, parameterizedList.size()),
+				() -> assertTrue(sorted));
+	}
+
+	public <T> List<T> getParameterizedList(String uri, HttpEntity<PortfolioCriteria> postRequest, ParameterizedTypeReference<List<T>> responseType) {
+		return restTemplate.exchange(uri, HttpMethod.POST, postRequest, responseType).getBody();
 	}
 }
