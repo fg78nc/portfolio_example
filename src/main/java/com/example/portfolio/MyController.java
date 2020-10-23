@@ -26,7 +26,6 @@ public class MyController {
 	private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
  	private static Map<String, com.example.portfolio.Portfolio> data = new HashMap<>();
- 	private static final String PORTFOLIO_NAME = "Portfolio_1";
  	private static final List<String> securityIDs = new ArrayList<>();
 
  	static {
@@ -71,36 +70,21 @@ public class MyController {
 		return result;
 	}
 
+	@GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Map<String, List<Portfolio>> allPortfolioGroupedByLongAndShort(){
+		return data.values().stream().collect(Collectors.groupingBy(Portfolio::getSide));
+	}
+
 	private void sortResult(PortfolioCriteria portfolioCriteria, List<Portfolio> result) {
 		String orderBy = portfolioCriteria.getOrderBy();
 
 		if(Objects.nonNull(orderBy)){
 			switch (orderBy){
-		   case "shortPosition" : result.sort(Comparator.comparingInt(Portfolio::getShortPosition)); break;
-		   case "side" : result.sort(Comparator.comparing(Portfolio::getSide)); break;
-		   case "securityId" : result.sort(Comparator.comparing(Portfolio::getSecurityId)); break;
-		   }
-		}
-	}
-
-	@GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Map<String, List<Portfolio>> allPortfolioGroupedByLongAndShort(){
-
-		Map<String, List<Portfolio>> result = new HashMap<>();
-		List<Portfolio> shortPositions = new ArrayList<>();
-		List<Portfolio> longPositions = new ArrayList<>();
-
-		data.forEach((k,v) -> {
-			if (v.getSide().equals("short")) {
-				shortPositions.add(v);
-			} else {
-				longPositions.add(v);
+			case "shortPosition" : result.sort(Comparator.comparingInt(Portfolio::getShortPosition)); break;
+			case "side" : result.sort(Comparator.comparing(Portfolio::getSide)); break;
+			case "securityId" : result.sort(Comparator.comparing(Portfolio::getSecurityId)); break;
 			}
-		});
-
-		result.put("long", longPositions);
-		result.put("short", shortPositions);
-		return result;
+		}
 	}
 
 }
