@@ -1,4 +1,4 @@
-package com.example.portfolio;
+package com.example.portfolio.domain;
 
 
 public class Portfolio {
@@ -13,7 +13,7 @@ public class Portfolio {
 	public Portfolio(){
 	}
 
-	Portfolio(int shortPosition, int longPosition, String side, String securityId, int currentPosition, int currentPrice) {
+	public Portfolio(int shortPosition, int longPosition, String side, String securityId, int currentPosition, int currentPrice) {
 		this.shortPosition = shortPosition;
 		this.longPosition = longPosition;
 		this.side = side;

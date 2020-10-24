@@ -1,4 +1,4 @@
-package com.example.portfolio;
+package com.example.portfolio.domain;
 
 // Security ID, Current Position, and Current Price. Also user might have option to order data based on any of the field
 public class PortfolioCriteria {
@@ -8,10 +8,10 @@ public class PortfolioCriteria {
 	private String securityId;
 	private String orderBy;
 
-	PortfolioCriteria() {
+	public PortfolioCriteria() {
 	}
 
-	PortfolioCriteria(Integer shortPosition, String side, String securityId, String orderBy) {
+	public PortfolioCriteria(Integer shortPosition, String side, String securityId, String orderBy) {
 		this.shortPosition = shortPosition;
 		this.side = side;
 		this.securityId = securityId;

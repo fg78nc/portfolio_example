@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import com.example.portfolio.domain.Portfolio;
+import com.example.portfolio.domain.PortfolioCriteria;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
@@ -66,7 +67,6 @@ class PortfolioApplicationTests {
 		assertThrows(HttpClientErrorException.class, () -> restTemplate
 				.postForEntity(url.concat("/select"), portfolioCriteria, List.class));
 	}
-
 
 	@Test
 	void shouldReturn10ElementsSortedBySecurityId() {

@@ -1,7 +1,8 @@
-package com.example.portfolio;
+package com.example.portfolio.controller;
 
 import java.lang.invoke.MethodHandles;
 
+import com.example.portfolio.exception.DataNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
 public class GlobalController {
@@ -18,7 +18,6 @@ public class GlobalController {
 	private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	@ExceptionHandler
-//	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public ResponseEntity<String> handle(Exception e) {
 		log.info("Exception caught : {}, returning 404", e.getMessage());
